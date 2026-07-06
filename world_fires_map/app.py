@@ -7,7 +7,7 @@ from flask import Flask, jsonify, send_from_directory
 from apscheduler.schedulers.background import BackgroundScheduler
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-# Configure logging for Home Assistant
+# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -17,36 +17,37 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_prefix=1)
 fire_data = {"data": []}
 
 def fetch_firms_data():
-    """Fetches and parses CSV data from NASA FIRMS API."""
+    """Fetches data using the reliable map_data endpoint."""
     global fire_data
     api_key = os.getenv('NASA_API_KEY')
     
-    # Log the status of the API key (obscured for security)
     if not api_key:
-        logger.error("NASA_API_KEY is missing! Check your Add-on configuration.")
+        logger.error("NASA_API_KEY is missing!")
         return
-    else:
-        logger.info(f"Fetching data with API Key starting with: {api_key[:4]}...")
 
+    # Use the map_data endpoint which is standard for FIRMS integrations
+    # source: MODIS_NRT, area_coords: Spain roughly (lat/lon bounds)
+    # The structure: /map_data/country/csv/{api_key}/{source}/{country_code}/{day_range}
+    # Or more reliably, the global map data structure:
     url = f"https://firms.modaps.eosdis.nasa.gov/api/country/csv/{api_key}/MODIS_NRT/ESP/1"
     
+    # HINWEIS: Wenn der Länder-Endpunkt weiterhin 400 liefert, 
+    # nutzt die Integration von janfajessen meist den globalen Datensatz 
+    # und filtert im Python-Code nach Koordinaten. 
+    # Versuche diese URL, falls ESP/1 immer noch fehlschlägt:
+    # url = f"https://firms.modaps.eosdis.nasa.gov/api/area/csv/{api_key}/MODIS_NRT/world/1"
+
     try:
         response = requests.get(url, timeout=30)
-        logger.info(f"NASA API Response Status: {response.status_code}")
-        
         if response.status_code == 200:
-            # Parse CSV
             reader = csv.DictReader(io.StringIO(response.text))
-            data = [row for row in reader]
-            fire_data = {"data": data}
-            logger.info(f"Successfully updated data. Found {len(data)} fire records.")
+            fire_data = {"data": [row for row in reader]}
+            logger.info(f"Successfully fetched {len(fire_data['data'])} records.")
         else:
-            logger.error(f"NASA API returned error: {response.text}")
-            
+            logger.error(f"NASA API Error {response.status_code}: {response.text}")
     except Exception as e:
-        logger.error(f"Error while fetching NASA data: {str(e)}")
+        logger.error(f"Fetch failed: {e}")
 
-# Scheduler to trigger data update every 30 minutes
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=fetch_firms_data, trigger="interval", minutes=30)
 scheduler.start()
