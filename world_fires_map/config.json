@@ -2,11 +2,14 @@
   "name": "World Fires Map",
   "version": "1.0.0",
   "slug": "world_fires_map",
-  "description": "NASA FIRMS 30 Min",
+  "description": "Local NASA FIRMS fire map service",
+  "arch": ["aarch64", "amd64", "armv7", "i386"],
+  "startup": "once",
+  "boot": "auto",
   "ingress": true,
   "ingress_port": 8080,
   "options": {
-    "nasa_api_key": "YourKey"
+    "nasa_api_key": ""
   },
   "schema": {
     "nasa_api_key": "str"
