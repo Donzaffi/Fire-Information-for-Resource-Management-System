@@ -17,26 +17,23 @@ fire_data = {"data": []}
 
 def fetch_firms_data():
     global fire_data
-    # Read variables from environment
     api_key = os.getenv('NASA_API_KEY')
-    lat = os.getenv('LATITUDE', '40.4637')
-    lon = os.getenv('LONGITUDE', '-3.7492')
-    radius = os.getenv('RADIUS', '100')
+    # Bounding box defaults (Spain)
+    bbox = f"{os.getenv('WEST', '-9.3')},{os.getenv('SOUTH', '36.0')},{os.getenv('EAST', '4.0')},{os.getenv('NORTH', '43.8')}"
     
     if not api_key:
         logger.error("NASA_API_KEY is missing!")
         return
 
-    # Use the area/csv endpoint: /api/area/csv/{api_key}/{source}/{longitude},{latitude},{radius}/1
-    # Note: NASA expects {lon},{lat},{radius} in that specific order
-    url = f"https://firms.modaps.eosdis.nasa.gov/api/area/csv/{api_key}/MODIS_NRT/{lon},{lat},{radius}/1"
+    # NASA API format: .../api/area/csv/{api_key}/{source}/{bbox}/1
+    url = f"https://firms.modaps.eosdis.nasa.gov/api/area/csv/{api_key}/MODIS_NRT/{bbox}/1"
     
     try:
         response = requests.get(url, timeout=30)
         if response.status_code == 200:
             reader = csv.DictReader(io.StringIO(response.text))
             fire_data = {"data": [row for row in reader]}
-            logger.info(f"Fetched {len(fire_data['data'])} records for area centered at {lat}, {lon}.")
+            logger.info(f"Successfully fetched {len(fire_data['data'])} records.")
         else:
             logger.error(f"NASA API Error {response.status_code}: {response.text}")
     except Exception as e:
