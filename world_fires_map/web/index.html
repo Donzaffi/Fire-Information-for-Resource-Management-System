@@ -13,42 +13,59 @@
 <body>
     <div id="map"></div>
     <script>
-        // Karte initialisieren (Zentriert auf Europa)
+        // Initialize map centered on Europe
         const map = L.map('map').setView([50.0, 10.0], 4);
 
+        // Use CARTO basemaps
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
             subdomains: 'abcd',
             maxZoom: 20
         }).addTo(map);
 
-        // Distanz-Berechnung
+        // Haversine formula to calculate distance between two points in km
         function getDist(lat1, lon1, lat2, lon2) {
-            const R = 6371;
+            const R = 6371; // Earth radius in km
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2)**2 + Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLon/2)**2;
+            const a = Math.sin(dLat/2)**2 + 
+                      Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLon/2)**2;
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        // Konfiguration und Daten laden
+        // Fetch configuration and fire data, then filter and display markers
         async function load() {
-            const [confRes, dataRes] = await Promise.all([fetch('/api/config'), fetch('/api/data')]);
-            const config = await confRes.json();
-            const json = await dataRes.json();
+            try {
+                const [confRes, dataRes] = await Promise.all([fetch('/api/config'), fetch('/api/data')]);
+                const config = await confRes.json();
+                const json = await dataRes.json();
 
-            if (json.data && Array.isArray(json.data)) {
-                json.data.forEach(fire => {
-                    const lat = parseFloat(fire.latitude);
-                    const lon = parseFloat(fire.longitude);
-                    // Filter: Nur anzeigen, wenn innerhalb des Radius der HA-Konfiguration
-                    if (getDist(config.lat, config.lon, lat, lon) <= config.radius) {
-                        L.marker([lat, lon]).addTo(map)
-                         .bindPopup(`Feuer erkannt um: ${fire.acq_time} UTC`);
-                    }
-                });
+                console.log("Configuration loaded:", config);
+                let fireCount = 0;
+
+                if (json.data && Array.isArray(json.data)) {
+                    json.data.forEach(fire => {
+                        const lat = parseFloat(fire.latitude);
+                        const lon = parseFloat(fire.longitude);
+                        
+                        // Filter: Display marker only if within the configured radius
+                        if (getDist(config.lat, config.lon, lat, lon) <= config.radius) {
+                            L.marker([lat, lon]).addTo(map)
+                             .bindPopup(`Fire detected at: ${fire.acq_time} UTC`);
+                            fireCount++;
+                        }
+                    });
+                }
+                
+                console.log(`Successfully displayed ${fireCount} fires within ${config.radius}km.`);
+                if (fireCount === 0) {
+                    console.warn("No fires found within the specified radius.");
+                }
+            } catch (error) {
+                console.error("Error loading map data:", error);
             }
         }
+
         load();
     </script>
 </body>
