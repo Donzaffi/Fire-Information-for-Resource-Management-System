@@ -10,9 +10,15 @@
   "ingress_port": 8080,
   "init": false,
   "options": {
-    "nasa_api_key": ""
+    "nasa_api_key": "",
+    "latitude": "",
+    "longitude": "",
+    "radius_km": ""
   },
   "schema": {
-    "nasa_api_key": "str"
+    "nasa_api_key": "str",
+    "latitude": "str",
+    "longitude": "str",
+    "radius_km": "str"
   }
 }
