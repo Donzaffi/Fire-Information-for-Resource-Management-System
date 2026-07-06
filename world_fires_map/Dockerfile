@@ -1,22 +1,20 @@
-# Use the official base image
 ARG BUILD_FROM=ghcr.io/hassio-addons/base:21.0.0
 FROM $BUILD_FROM
 
-# Install Python3 and pip
 RUN apk add --no-cache python3 py3-pip
 
-# Set working directory
 WORKDIR /app
 
-# Copy requirements and install
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
 COPY . /app/
 
-# Remove s6 service files that might be causing conflicts
-RUN rm -rf /etc/services.d/*
+# Create the s6-service directory
+RUN mkdir -p /etc/services.d/world_fires_map
+# Move the run script into the service directory
+RUN cp /app/run.sh /etc/services.d/world_fires_map/run
+RUN chmod a+x /etc/services.d/world_fires_map/run
 
-# Run directly without relying on s6 service definitions
-CMD ["python3", "/app/app.py"]
+# NO CMD or ENTRYPOINT here! 
+# The s6-overlay will automatically pick up the service from /etc/services.d/
