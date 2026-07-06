@@ -36,7 +36,8 @@
         // Fetch configuration and fire data, then filter and display markers
         async function load() {
             try {
-                const [confRes, dataRes] = await Promise.all([fetch('/api/config'), fetch('/api/data')]);
+                // Use relative paths to support Home Assistant Ingress routing
+                const [confRes, dataRes] = await Promise.all([fetch('api/config'), fetch('api/data')]);
                 const config = await confRes.json();
                 const json = await dataRes.json();
 
