@@ -36,8 +36,9 @@ def fetch_firms_data():
 
     logger.info(f"Fetching data for location {lat}, {lon} with radius {radius}km")
 
-    # URL for ESP (Spain) region, last 24 hours
-    url = f"https://firms.modaps.eosdis.nasa.gov/api/country/csv/{api_key}/MODIS_NRT/ESP/1"
+# URL for radius search using the area endpoint
+    # Format: {api_key}/MODIS_NRT/{latitude},{longitude},{radius_km}/1
+    url = f"https://firms.modaps.eosdis.nasa.gov/api/area/csv/{api_key}/MODIS_NRT/{lat},{lon},{radius}/1"
     
     try:
         response = requests.get(url, timeout=30)
