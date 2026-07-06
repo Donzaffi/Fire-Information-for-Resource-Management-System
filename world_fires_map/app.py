@@ -7,7 +7,6 @@ from flask import Flask, jsonify, send_from_directory
 from apscheduler.schedulers.background import BackgroundScheduler
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -17,32 +16,27 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_prefix=1)
 fire_data = {"data": []}
 
 def fetch_firms_data():
-    """Fetches data using the reliable map_data endpoint."""
     global fire_data
+    # Read variables from environment
     api_key = os.getenv('NASA_API_KEY')
+    lat = os.getenv('LATITUDE', '40.4637')
+    lon = os.getenv('LONGITUDE', '-3.7492')
+    radius = os.getenv('RADIUS', '100')
     
     if not api_key:
         logger.error("NASA_API_KEY is missing!")
         return
 
-    # Use the map_data endpoint which is standard for FIRMS integrations
-    # source: MODIS_NRT, area_coords: Spain roughly (lat/lon bounds)
-    # The structure: /map_data/country/csv/{api_key}/{source}/{country_code}/{day_range}
-    # Or more reliably, the global map data structure:
-    url = f"https://firms.modaps.eosdis.nasa.gov/api/country/csv/{api_key}/MODIS_NRT/ESP/1"
+    # Use the area/csv endpoint: /api/area/csv/{api_key}/{source}/{longitude},{latitude},{radius}/1
+    # Note: NASA expects {lon},{lat},{radius} in that specific order
+    url = f"https://firms.modaps.eosdis.nasa.gov/api/area/csv/{api_key}/MODIS_NRT/{lon},{lat},{radius}/1"
     
-    # HINWEIS: Wenn der Länder-Endpunkt weiterhin 400 liefert, 
-    # nutzt die Integration von janfajessen meist den globalen Datensatz 
-    # und filtert im Python-Code nach Koordinaten. 
-    # Versuche diese URL, falls ESP/1 immer noch fehlschlägt:
-    # url = f"https://firms.modaps.eosdis.nasa.gov/api/area/csv/{api_key}/MODIS_NRT/world/1"
-
     try:
         response = requests.get(url, timeout=30)
         if response.status_code == 200:
             reader = csv.DictReader(io.StringIO(response.text))
             fire_data = {"data": [row for row in reader]}
-            logger.info(f"Successfully fetched {len(fire_data['data'])} records.")
+            logger.info(f"Fetched {len(fire_data['data'])} records for area centered at {lat}, {lon}.")
         else:
             logger.error(f"NASA API Error {response.status_code}: {response.text}")
     except Exception as e:
