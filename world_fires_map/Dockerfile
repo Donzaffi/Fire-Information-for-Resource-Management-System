@@ -1,20 +1,15 @@
-ARG BUILD_FROM=ghcr.io/hassio-addons/base:21.0.0
-FROM $BUILD_FROM
+ARG BUILD_FROM=ghcr.io/home-assistant/{arch}-base-python:3.13
 
-RUN apk add --no-cache python3 py3-pip
+FROM ${BUILD_FROM}
 
 WORKDIR /app
 
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt .
 
-COPY . /app/
+RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
-# Create the s6-service directory
-RUN mkdir -p /etc/services.d/world_fires_map
-# Move the run script into the service directory
-RUN cp /app/run.sh /etc/services.d/world_fires_map/run
-RUN chmod a+x /etc/services.d/world_fires_map/run
+COPY . .
 
-# NO CMD or ENTRYPOINT here! 
-# The s6-overlay will automatically pick up the service from /etc/services.d/
+RUN chmod +x /app/run.sh
+
+CMD ["/app/run.sh"]
