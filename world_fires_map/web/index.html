@@ -1,24 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
+    <title>World Fires Map</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <style>#map { height: 100vh; }</style>
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { height: 100vh; width: 100vw; }
+    </style>
 </head>
 <body>
     <div id="map"></div>
     <script>
-        const map = L.map('map').setView([40.4637, -3.7492], 6); // Spain center
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        // Initialisierung der Karte auf Spanien
+        const map = L.map('map').setView([40.4637, -3.7492], 6);
 
+        // Nutzung von CARTO Basemaps anstelle der restriktiven OSM-Standard-Tiles
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }).addTo(map);
+
+        // Daten von deinem Flask-Backend abrufen
         fetch('/api/data')
             .then(response => response.json())
             .then(json => {
-                json.data.forEach(fire => {
-                    L.marker([fire.latitude, fire.longitude]).addTo(map)
-                     .bindPopup(`Fire detected at: ${fire.acq_time}`);
-                });
-            });
+                if (json.data && Array.isArray(json.data)) {
+                    json.data.forEach(fire => {
+                        // Marker setzen
+                        L.marker([fire.latitude, fire.longitude]).addTo(map)
+                         .bindPopup(`Feuer erkannt um: ${fire.acq_time} UTC`);
+                    });
+                }
+            })
+            .catch(error => console.error('Fehler beim Laden der Branddaten:', error));
     </script>
 </body>
 </html>
