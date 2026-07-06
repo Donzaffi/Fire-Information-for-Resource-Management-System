@@ -8,18 +8,11 @@
   "boot": "auto",
   "ingress": true,
   "ingress_port": 8080,
+  "init": false,
   "options": {
-    "nasa_api_key": "",
-    "west": -9.3,
-    "south": 36.0,
-    "east": 4.0,
-    "north": 43.8
+    "nasa_api_key": ""
   },
   "schema": {
-    "nasa_api_key": "str",
-    "west": "float",
-    "south": "float",
-    "east": "float",
-    "north": "float"
+    "nasa_api_key": "str"
   }
 }
