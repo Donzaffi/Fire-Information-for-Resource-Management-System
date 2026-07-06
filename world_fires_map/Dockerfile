@@ -1,4 +1,4 @@
-# Use the official Home Assistant base image for aarch64 as a fallback
+# Use the official Home Assistant base image for aarch64
 ARG BUILD_FROM=homeassistant/aarch64-base:latest
 FROM $BUILD_FROM
 
@@ -18,5 +18,5 @@ COPY . .
 # Set execution permissions for the start script
 RUN chmod a+x /app/run.sh
 
-# Ensure the container starts the run.sh script correctly
-ENTRYPOINT ["/app/run.sh"]
+# Use CMD instead of ENTRYPOINT to let the supervisor manage the process
+CMD ["/app/run.sh"]
