@@ -1,22 +1,22 @@
-# Use the official HA base image that does not enforce s6-overlay complexity
-ARG BUILD_FROM=homeassistant/aarch64-base:latest
+# Use the official base image
+ARG BUILD_FROM=ghcr.io/hassio-addons/base:21.0.0
 FROM $BUILD_FROM
 
-# Install dependencies
+# Install Python3 and pip
 RUN apk add --no-cache python3 py3-pip
 
 # Set working directory
 WORKDIR /app
 
-# Install Python packages
+# Copy requirements and install
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy files
+# Copy application code
 COPY . /app/
 
-# Set execution permission
-RUN chmod a+x /app/run.sh
+# Remove s6 service files that might be causing conflicts
+RUN rm -rf /etc/services.d/*
 
-# This is the standard, simple way to start an add-on
-CMD ["/app/run.sh"]
+# Run directly without relying on s6 service definitions
+CMD ["python3", "/app/app.py"]
