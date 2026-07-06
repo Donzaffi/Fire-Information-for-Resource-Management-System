@@ -18,5 +18,5 @@ COPY . .
 # Set execution permissions for the start script
 RUN chmod a+x /app/run.sh
 
-# Start the application
-CMD ["/app/run.sh"]
+# Ensure the container starts the run.sh script correctly
+ENTRYPOINT ["/app/run.sh"]
