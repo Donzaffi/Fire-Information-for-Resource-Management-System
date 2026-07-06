@@ -1,9 +1,8 @@
-#!/usr/bin/with-contenv bashio
-
-# Retrieve configuration using the official Home Assistant helper
+#!/bin/bash
+# Get the API Key from Home Assistant configuration
 export NASA_API_KEY=$(bashio::config 'nasa_api_key')
 
-echo "Starting World Fires Map application..."
+echo "Starting World Fires Map..."
 
-# Exec ensures the process runs correctly under the s6 manager
-exec python3 /app/app.py
+# Simple python execution as PID 1
+python3 /app/app.py
