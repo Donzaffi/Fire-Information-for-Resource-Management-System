@@ -17,16 +17,19 @@ fire_data = {"data": []}
 
 def fetch_firms_data():
     global fire_data
+    # Reading configuration from environment variables
     api_key = os.getenv('NASA_API_KEY')
-    # Bounding box defaults (Spain)
-    bbox = f"{os.getenv('WEST', '-9.3')},{os.getenv('SOUTH', '36.0')},{os.getenv('EAST', '4.0')},{os.getenv('NORTH', '43.8')}"
+    west = os.getenv('WEST', '-9.3')
+    south = os.getenv('SOUTH', '36.0')
+    east = os.getenv('EAST', '4.0')
+    north = os.getenv('NORTH', '43.8')
     
     if not api_key:
         logger.error("NASA_API_KEY is missing!")
         return
 
-    # NASA API format: .../api/area/csv/{api_key}/{source}/{bbox}/1
-    url = f"https://firms.modaps.eosdis.nasa.gov/api/area/csv/{api_key}/MODIS_NRT/{bbox}/1"
+    # NASA API format: .../api/area/csv/{api_key}/MODIS_NRT/{west},{south},{east},{north}/1
+    url = f"https://firms.modaps.eosdis.nasa.gov/api/area/csv/{api_key}/MODIS_NRT/{west},{south},{east},{north}/1"
     
     try:
         response = requests.get(url, timeout=30)
