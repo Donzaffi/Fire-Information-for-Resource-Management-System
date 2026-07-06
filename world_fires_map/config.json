@@ -8,6 +8,7 @@
   "boot": "auto",
   "ingress": true,
   "ingress_port": 8080,
+  "init": false
   "options": {
     "nasa_api_key": ""
   },
