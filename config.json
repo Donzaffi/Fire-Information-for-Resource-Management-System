@@ -2,11 +2,11 @@
   "name": "World Fires Map",
   "version": "1.0.0",
   "slug": "world_fires_map",
-  "description": "NASA FIRMS Feuer-Karte mit 30-Minuten-Intervall",
+  "description": "NASA FIRMS 30 Min",
   "ingress": true,
   "ingress_port": 8080,
   "options": {
-    "nasa_api_key": "DEIN_KEY_HIER"
+    "nasa_api_key": "YourKey"
   },
   "schema": {
     "nasa_api_key": "str"
