@@ -1,22 +1,22 @@
-# Use the official Home Assistant base image
-ARG BUILD_FROM=ghcr.io/hassio-addons/base:21.0.0
+# Use the official HA base image that does not enforce s6-overlay complexity
+ARG BUILD_FROM=homeassistant/aarch64-base:latest
 FROM $BUILD_FROM
 
-# Install Python3 and pip
+# Install dependencies
 RUN apk add --no-cache python3 py3-pip
 
 # Set working directory
 WORKDIR /app
 
-# Copy requirements and install
+# Install Python packages
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
+# Copy files
 COPY . /app/
 
-# Create the s6-service directory and copy the run script
-# s6-overlay will automatically pick up any script in /etc/services.d/
-RUN mkdir -p /etc/services.d/app
-RUN cp /app/run.sh /etc/services.d/app/run
-RUN chmod a+x /etc/services.d/app/run
+# Set execution permission
+RUN chmod a+x /app/run.sh
+
+# This is the standard, simple way to start an add-on
+CMD ["/app/run.sh"]
