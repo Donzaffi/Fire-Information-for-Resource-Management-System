@@ -1,5 +1,5 @@
-# BUILD_FROM is provided automatically by the Home Assistant supervisor based on architecture
-ARG BUILD_FROM
+# Use the official Home Assistant base image for aarch64 as a fallback
+ARG BUILD_FROM=homeassistant/aarch64-base:latest
 FROM $BUILD_FROM
 
 # Install Python3 and pip
