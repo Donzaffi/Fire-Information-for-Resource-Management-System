@@ -87,6 +87,15 @@ def get_data():
     """Endpoint for the frontend to retrieve cached fire data."""
     return jsonify(fire_data)
 
+@app.route('/api/config')
+def get_config():
+    """Returns the configured location settings to the frontend."""
+    return jsonify({
+        "lat": float(os.getenv('LATITUDE', 0)),
+        "lon": float(os.getenv('LONGITUDE', 0)),
+        "radius": float(os.getenv('RADIUS_KM', 100))
+    })
+
 if __name__ == '__main__':
     # Initial fetch when the application starts
     fetch_firms_data()
