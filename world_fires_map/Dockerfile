@@ -1,11 +1,13 @@
-ARG BUILD_FROM=ghcr.io/home-assistant/{arch}-base-python:3.13
-
+ARG BUILD_FROM=ghcr.io/home-assistant/{arch}-base:latest
 FROM ${BUILD_FROM}
+
+RUN apk add --no-cache \
+    python3 \
+    py3-pip
 
 WORKDIR /app
 
 COPY requirements.txt .
-
 RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
 COPY . .
