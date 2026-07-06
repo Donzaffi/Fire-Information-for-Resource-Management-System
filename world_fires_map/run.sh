@@ -1,6 +1,11 @@
-#!/bin/bash
-# Note: NASA_API_KEY is automatically injected by Home Assistant
-# as an environment variable based on config.json
+#!/usr/bin/with-contenv bashio
 
-echo "Starting World Fires Map..."
-python3 /app/app.py
+# Use bashio to read the configuration. 
+# This command is required by the supervisor to properly map the config.
+export NASA_API_KEY=$(bashio::config 'nasa_api_key')
+
+echo "Starting World Fires Map application..."
+
+# 'exec' is the magic word here. It replaces the bash process with the python process.
+# This makes Python PID 1 and satisfies s6-overlay.
+exec python3 /app/app.py
