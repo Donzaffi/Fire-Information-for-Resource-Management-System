@@ -42,7 +42,7 @@
                 const json = await dataRes.json();
 
                 // Set view based on configuration (Zoom level 8 is a good start)
-                map.setView([parseFloat(config.lat), parseFloat(config.lon)], 8);
+                map.setView([parseFloat(config.lat), parseFloat(config.lon)], 12);
 
                 console.log("Configuration loaded:", config);
                 let fireCount = 0;
