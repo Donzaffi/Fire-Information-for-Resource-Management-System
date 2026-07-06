@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>#map { height: 100vh; }</style>
+</head>
+<body>
+    <div id="map"></div>
+    <script>
+        const map = L.map('map').setView([40.4637, -3.7492], 6); // Spain center
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        fetch('/api/data')
+            .then(response => response.json())
+            .then(json => {
+                json.data.forEach(fire => {
+                    L.marker([fire.latitude, fire.longitude]).addTo(map)
+                     .bindPopup(`Fire detected at: ${fire.acq_time}`);
+                });
+            });
+    </script>
+</body>
+</html>
