@@ -25,10 +25,10 @@ def fetch_firms_data():
     try:
         response = requests.get(url, timeout=30)
         if response.status_code == 200:
-            # Parse CSV without pandas to save resources
+            # Parse CSV without pandas
             reader = csv.DictReader(io.StringIO(response.text))
             fire_data = {"data": [row for row in reader]}
-            print(f"Data updated successfully.")
+            print("Data updated successfully.")
     except Exception as e:
         print(f"Error while fetching NASA data: {e}")
 
@@ -50,5 +50,5 @@ def get_data():
 if __name__ == '__main__':
     # Initial fetch when the application starts
     fetch_firms_data()
-    # Run the web server
+    # Run the web server on all interfaces
     app.run(host='0.0.0.0', port=8080)
