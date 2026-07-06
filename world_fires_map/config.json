@@ -8,17 +8,18 @@
   "boot": "auto",
   "ingress": true,
   "ingress_port": 8080,
-  "init": false,
   "options": {
     "nasa_api_key": "",
-    "latitude": 40.4637,
-    "longitude": -3.7492,
-    "radius": 100
+    "west": -9.3,
+    "south": 36.0,
+    "east": 4.0,
+    "north": 43.8
   },
   "schema": {
     "nasa_api_key": "str",
-    "latitude": "float",
-    "longitude": "float",
-    "radius": "int"
+    "west": "float",
+    "south": "float",
+    "east": "float",
+    "north": "float"
   }
 }
