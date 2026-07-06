@@ -13,29 +13,43 @@
 <body>
     <div id="map"></div>
     <script>
-        // Initialisierung der Karte auf Spanien
-        const map = L.map('map').setView([40.4637, -3.7492], 6);
+        // Karte initialisieren (Zentriert auf Europa)
+        const map = L.map('map').setView([50.0, 10.0], 4);
 
-        // Nutzung von CARTO Basemaps anstelle der restriktiven OSM-Standard-Tiles
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
             subdomains: 'abcd',
             maxZoom: 20
         }).addTo(map);
 
-        // Daten von deinem Flask-Backend abrufen
-        fetch('/api/data')
-            .then(response => response.json())
-            .then(json => {
-                if (json.data && Array.isArray(json.data)) {
-                    json.data.forEach(fire => {
-                        // Marker setzen
-                        L.marker([fire.latitude, fire.longitude]).addTo(map)
+        // Distanz-Berechnung
+        function getDist(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2)**2 + Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLon/2)**2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+
+        // Konfiguration und Daten laden
+        async function load() {
+            const [confRes, dataRes] = await Promise.all([fetch('/api/config'), fetch('/api/data')]);
+            const config = await confRes.json();
+            const json = await dataRes.json();
+
+            if (json.data && Array.isArray(json.data)) {
+                json.data.forEach(fire => {
+                    const lat = parseFloat(fire.latitude);
+                    const lon = parseFloat(fire.longitude);
+                    // Filter: Nur anzeigen, wenn innerhalb des Radius der HA-Konfiguration
+                    if (getDist(config.lat, config.lon, lat, lon) <= config.radius) {
+                        L.marker([lat, lon]).addTo(map)
                          .bindPopup(`Feuer erkannt um: ${fire.acq_time} UTC`);
-                    });
-                }
-            })
-            .catch(error => console.error('Fehler beim Laden der Branddaten:', error));
+                    }
+                });
+            }
+        }
+        load();
     </script>
 </body>
 </html>
